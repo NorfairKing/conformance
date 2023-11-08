@@ -30,13 +30,13 @@ import Data.Functor.Identity
 --    The @w@ parameter represents warnings to represent cases where requirements or prohibitions were violated.
 newtype ConformT ue fe w m a = ConformT
   { unConformT ::
-      ReaderT (fe -> Bool) (WriterT (Notes fe w) (ExceptT (HaltReason ue fe) m)) a
+      ReaderT (fe -> m Bool) (WriterT (Notes fe w) (ExceptT (HaltReason ue fe) m)) a
   }
   deriving newtype
     ( Functor,
       Applicative,
       Monad,
-      MonadReader (fe -> Bool),
+      MonadReader (fe -> m Bool),
       MonadError (HaltReason ue fe),
       MonadWriter (Notes fe w)
     )
@@ -94,7 +94,7 @@ nullNotes Notes {..} = null notesFixableErrors && null notesWarnings
 
 -- | Most flexible way to run a 'ConformT'
 runConformTFlexible ::
-  (fe -> Bool) ->
+  (fe -> m Bool) ->
   ConformT ue fe w m a ->
   m (Either (HaltReason ue fe) (a, Notes fe w))
 runConformTFlexible predicate (ConformT func) = runExceptT (runWriterT (runReaderT func predicate))
@@ -152,7 +152,7 @@ runConformFlexible ::
   (fe -> Bool) ->
   Conform ue fe w a ->
   Either (HaltReason ue fe) (a, Notes fe w)
-runConformFlexible predicate = runIdentity . runConformTFlexible predicate
+runConformFlexible predicate = runIdentity . runConformTFlexible (Identity . predicate)
 
 -- | Don't fix any fixable errors.
 --
@@ -192,11 +192,11 @@ tryConform c = ConformT $ ReaderT $ \predicate -> do
       tell notes
       pure (Just result)
 
-fixAll :: fe -> Bool
-fixAll = const True
+fixAll :: Applicative m => fe -> m Bool
+fixAll = const $ pure True
 
-fixNone :: fe -> Bool
-fixNone = const False
+fixNone :: Applicative m => fe -> m Bool
+fixNone = const $ pure False
 
 conformFromEither :: Monad m => Either ue a -> ConformT ue fe w m a
 conformFromEither = \case
@@ -246,7 +246,8 @@ emitWarning w = tell (Notes [] [w])
 emitFixableError :: Monad m => fe -> ConformT ue fe w m ()
 emitFixableError fe = do
   predicate <- ask
-  if predicate fe
+  fixThisError <- lift $ predicate fe
+  if fixThisError
     then tell (Notes [fe] [])
     else throwError (HaltedBecauseOfStrictness fe)
 

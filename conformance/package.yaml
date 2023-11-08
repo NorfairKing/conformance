@@ -1,9 +1,12 @@
 name: conformance
-version: 0.0.0.0
+version: 0.1.0.0
 
 license: MIT
 maintainer: Tom Sydney Kerckhove <syd@cs-syd.eu>
 description: An RFC 2119 Monad transformer
+
+extra-source-files:
+- CHANGELOG.md
 
 dependencies:
 - base >= 4.7 && < 5

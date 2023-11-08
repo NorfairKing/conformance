@@ -4,5 +4,5 @@ mkDerivation {
   version = "0.0.0.0";
   src = ./.;
   libraryHaskellDepends = [ base mtl ];
-  license = "unknown";
+  license = lib.licenses.mit;
 }

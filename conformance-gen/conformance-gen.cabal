@@ -6,6 +6,9 @@ cabal-version: 1.12
 
 name:           conformance-gen
 version:        0.0.0.0
+description:    Testutils for conformance
+maintainer:     Tom Sydney Kerckhove <syd@cs-syd.eu>
+license:        MIT
 build-type:     Simple
 
 library

@@ -10,5 +10,5 @@ mkDerivation {
     base conformance genvalidity-sydtest sydtest
   ];
   testToolDepends = [ sydtest-discover ];
-  license = "unknown";
+  license = lib.licenses.mit;
 }

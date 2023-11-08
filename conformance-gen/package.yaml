@@ -1,6 +1,10 @@
 name: conformance-gen
 version: 0.0.0.0
 
+license: MIT
+maintainer: Tom Sydney Kerckhove <syd@cs-syd.eu>
+description: Testutils for conformance
+
 dependencies:
 - base >= 4.7 && < 5
 

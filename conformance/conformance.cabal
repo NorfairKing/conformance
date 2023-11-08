@@ -6,6 +6,9 @@ cabal-version: 1.12
 
 name:           conformance
 version:        0.0.0.0
+description:    An RFC 2119 Monad transformer
+maintainer:     Tom Sydney Kerckhove <syd@cs-syd.eu>
+license:        MIT
 build-type:     Simple
 
 library

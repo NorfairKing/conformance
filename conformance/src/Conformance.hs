@@ -192,6 +192,20 @@ tryConform c = ConformT $ ReaderT $ \predicate -> do
       tell notes
       pure (Just result)
 
+-- | Try to run a conform function, return the error if there were unfixable
+-- errors or unfixed fixable errors.
+tryConformDetailed ::
+  (Monad m) =>
+  ConformT ue fe w m a ->
+  ConformT ue fe w m (Either (HaltReason ue fe) a)
+tryConformDetailed c = ConformT $ ReaderT $ \predicate -> do
+  errOrNotes <- lift $ lift $ runConformTFlexible predicate c
+  case errOrNotes of
+    Left hr -> pure (Left hr)
+    Right (a, notes) -> do
+      tell notes
+      pure (Right a)
+
 fixAll :: Applicative m => fe -> m Bool
 fixAll = const $ pure True
 

@@ -8,9 +8,6 @@ description: Testutils for conformance
 dependencies:
 - base >= 4.7 && < 5
 
-extra-source-files:
-- test_resources/**/*
-
 library:
   source-dirs: src
   dependencies:

@@ -42,7 +42,7 @@ shouldConformT func = do
             ]
     Right (a, _) -> pure a
 
-shouldConformLenient :: Show ue => Conform ue fe w a -> IO a
+shouldConformLenient :: (Show ue) => Conform ue fe w a -> IO a
 shouldConformLenient = assertLenientResultSucceeded . runConformLenient
 
 shouldConformTLenient :: (Show ue, MonadIO m) => ConformT ue fe w m a -> m a
@@ -50,7 +50,7 @@ shouldConformTLenient func = do
   errOrErrOrResult <- runConformTLenient func
   liftIO $ assertLenientResultSucceeded errOrErrOrResult
 
-assertLenientResultSucceeded :: Show ue => Either ue (a, Notes fe w) -> IO a
+assertLenientResultSucceeded :: (Show ue) => Either ue (a, Notes fe w) -> IO a
 assertLenientResultSucceeded errOrErrOrResult =
   case errOrErrOrResult of
     Left e -> expectationFailure $ show e

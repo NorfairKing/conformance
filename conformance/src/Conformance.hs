@@ -43,7 +43,7 @@ newtype ConformT ue fe w m a = ConformT
 
 -- We cannot have 'Alternative' because there is no 'empty', but we don't want to depend on some dependency that provides 'Alt': https://hackage.haskell.org/package/semigroupoids-5.3.7/docs/Data-Functor-Alt.html
 -- because it's a huge dependency.
-altConform :: Monad m => ConformT ue fe w m a -> ConformT ue fe w m a -> ConformT ue fe w m a
+altConform :: (Monad m) => ConformT ue fe w m a -> ConformT ue fe w m a -> ConformT ue fe w m a
 altConform cf1 cf2 = do
   decider <- ask
   errOrTup1 <- lift $ runConformTFlexible decider cf1
@@ -103,7 +103,7 @@ runConformTFlexible predicate (ConformT func) = runExceptT (runWriterT (runReade
 --
 -- This is standard-compliant.
 runConformT ::
-  Monad m =>
+  (Monad m) =>
   ConformT ue fe w m a ->
   m (Either (HaltReason ue fe) (a, [w]))
 runConformT func = do
@@ -116,7 +116,7 @@ runConformT func = do
 --
 -- This is standard-compliant, but potentially more strict than necessary.
 runConformTStrict ::
-  Monad m =>
+  (Monad m) =>
   ConformT ue fe w m a ->
   m (Either (Either ue (Notes fe w)) a)
 runConformTStrict func = do
@@ -132,7 +132,7 @@ runConformTStrict func = do
 --
 -- That this is __not__ standard-compliant.
 runConformTLenient ::
-  Monad m =>
+  (Monad m) =>
   ConformT ue fe w m a ->
   m (Either ue (a, Notes fe w))
 runConformTLenient func = do
@@ -181,7 +181,7 @@ runConformLenient = runIdentity . runConformTLenient
 -- | Try to run a conform function, return Nothing if there were unfixable
 -- errors or unfixed fixable errors.
 tryConform ::
-  Monad m =>
+  (Monad m) =>
   ConformT ue fe w m a ->
   ConformT ue fe w m (Maybe a)
 tryConform c = ConformT $ ReaderT $ \predicate -> do
@@ -206,18 +206,18 @@ tryConformDetailed c = ConformT $ ReaderT $ \predicate -> do
       tell notes
       pure (Right a)
 
-fixAll :: Applicative m => fe -> m Bool
+fixAll :: (Applicative m) => fe -> m Bool
 fixAll = const $ pure True
 
-fixNone :: Applicative m => fe -> m Bool
+fixNone :: (Applicative m) => fe -> m Bool
 fixNone = const $ pure False
 
-conformFromEither :: Monad m => Either ue a -> ConformT ue fe w m a
+conformFromEither :: (Monad m) => Either ue a -> ConformT ue fe w m a
 conformFromEither = \case
   Left ue -> unfixableError ue
   Right r -> pure r
 
-conformMapAll :: Monad m => (ue1 -> ue2) -> (fe1 -> fe2) -> (w1 -> w2) -> ConformT ue1 fe1 w1 m a -> ConformT ue2 fe2 w2 m a
+conformMapAll :: (Monad m) => (ue1 -> ue2) -> (fe1 -> fe2) -> (w1 -> w2) -> ConformT ue1 fe1 w1 m a -> ConformT ue2 fe2 w2 m a
 conformMapAll ueFunc feFunc wFunc (ConformT cFunc) =
   ConformT $
     mapReaderT
@@ -237,27 +237,27 @@ conformMapAll ueFunc feFunc wFunc (ConformT cFunc) =
       HaltedBecauseOfUnfixableError ue -> HaltedBecauseOfUnfixableError (ueFunc ue)
       HaltedBecauseOfStrictness fe -> HaltedBecauseOfStrictness (feFunc fe)
 
-conformMapErrors :: Monad m => (ue1 -> ue2) -> (fe1 -> fe2) -> ConformT ue1 fe1 w m a -> ConformT ue2 fe2 w m a
+conformMapErrors :: (Monad m) => (ue1 -> ue2) -> (fe1 -> fe2) -> ConformT ue1 fe1 w m a -> ConformT ue2 fe2 w m a
 conformMapErrors ueFunc feFunc = conformMapAll ueFunc feFunc id
 
 conformMapError ::
-  Monad m =>
+  (Monad m) =>
   (ue1 -> ue2) ->
   ConformT ue1 fe w m a ->
   ConformT ue2 fe w m a
 conformMapError func = conformMapErrors func id
 
 conformMapFixableError ::
-  Monad m =>
+  (Monad m) =>
   (fe1 -> fe2) ->
   ConformT ue fe1 w m a ->
   ConformT ue fe2 w m a
 conformMapFixableError = conformMapErrors id
 
-emitWarning :: Monad m => w -> ConformT ue fe w m ()
+emitWarning :: (Monad m) => w -> ConformT ue fe w m ()
 emitWarning w = tell (Notes [] [w])
 
-emitFixableError :: Monad m => fe -> ConformT ue fe w m ()
+emitFixableError :: (Monad m) => fe -> ConformT ue fe w m ()
 emitFixableError fe = do
   predicate <- ask
   fixThisError <- lift $ predicate fe
@@ -265,5 +265,5 @@ emitFixableError fe = do
     then tell (Notes [fe] [])
     else throwError (HaltedBecauseOfStrictness fe)
 
-unfixableError :: Monad m => ue -> ConformT ue fe w m a
+unfixableError :: (Monad m) => ue -> ConformT ue fe w m a
 unfixableError ue = throwError (HaltedBecauseOfUnfixableError ue)

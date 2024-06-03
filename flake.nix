@@ -2,7 +2,8 @@
   description = "conformance";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-24.05";
+    nixpkgs-23_11.url = "github:NixOS/nixpkgs?ref=nixos-23.11";
     nixpkgs-23_05.url = "github:NixOS/nixpkgs?ref=nixos-23.05";
     nixpkgs-22_11.url = "github:NixOS/nixpkgs?ref=nixos-22.11";
     nixpkgs-22_05.url = "github:NixOS/nixpkgs?ref=nixos-22.05";
@@ -26,6 +27,7 @@
   outputs =
     { self
     , nixpkgs
+    , nixpkgs-23_11
     , nixpkgs-23_05
     , nixpkgs-22_11
     , nixpkgs-22_05
@@ -65,6 +67,7 @@
           backwardCompatibilityCheckFor = nixpkgs: (haskellPackagesFor nixpkgs).conformanceRelease;
           allNixpkgs = {
             inherit
+              nixpkgs-23_11
               nixpkgs-23_05
               nixpkgs-22_11
               nixpkgs-22_05
